@@ -3,6 +3,8 @@ let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
+const axios = require("axios");
+const BASE_URL = "http://localhost:5000";  
 
 
 public_users.post("/register", (req, res) => {
@@ -25,6 +27,7 @@ public_users.post("/register", (req, res) => {
   
     return res.status(201).json({ message: "User registered successfully." });
   });
+
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
     res.send(JSON.stringify(books,null,4));
@@ -59,6 +62,7 @@ public_users.get('/author/:author', function (req, res) {
     }
 });
 
+
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
     const title = req.params.title;
@@ -92,5 +96,55 @@ public_users.get('/review/:isbn', function (req, res) {
         res.status(404).send({ message: "Book not found for the given ISBN." });
     }
 });
+
+const getBooks = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/`);
+      console.log("Books List:", response.data);
+    } catch (error) {
+      console.error("Error fetching books:", error.message);
+    }
+  };
+  
+  // Call it (for testing)
+  getBooks();
+  
+  const getBookByISBN = async (isbn) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/isbn/${isbn}`);
+      console.log(`Book with ISBN ${isbn}:`, response.data);
+    } catch (error) {
+      console.error("Error fetching book by ISBN:", error.message);
+    }
+  };
+  
+  // Example call
+  getBookByISBN(1);
+  
+
+  const getBooksByAuthor = async (author) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/author/${encodeURIComponent(author)}`);
+      console.log(`Books by ${author}:`, response.data);
+    } catch (error) {
+      console.error("Error fetching books by author:", error.message);
+    }
+  };
+  
+  // Example call
+  getBooksByAuthor("F. Scott Fitzgerald");
+  
+  const getBooksByTitle = async (title) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/title/${encodeURIComponent(title)}`);
+      console.log(`Books titled "${title}":`, response.data);
+    } catch (error) {
+      console.error("Error fetching books by title:", error.message);
+    }
+  };
+  
+  // Example call
+  getBooksByTitle("The Great Gatsby");
+  
 
 module.exports.general = public_users;
